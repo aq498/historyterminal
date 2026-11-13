@@ -3,9 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>World History · Terminal Revision Template</title>
+    <title>History Terminal: Interactive Revision</title>
     <style>
-        /* Terminal Style — Green Text on Black Background */
+        /* Terminal Style */
         * {
             margin: 0;
             padding: 0;
@@ -13,28 +13,31 @@
         }
 
         body {
-            background-color: #0a0a0a;
+            background-color: #050505;
             min-height: 100vh;
             display: flex;
             justify-content: center;
             align-items: center;
             font-family: 'Courier New', 'Consolas', 'Monaco', 'Lucida Console', monospace;
             padding: 20px;
+            color: #00ff41;
         }
 
         .terminal {
             width: 100%;
-            max-width: 1100px;
-            background-color: #0f0f0f;
+            max-width: 1000px;
+            height: 85vh;
+            background-color: #0a0a0a;
             border: 2px solid #00ff41;
-            border-radius: 12px;
-            box-shadow: 0 0 30px rgba(0, 255, 65, 0.25), inset 0 0 30px rgba(0, 255, 65, 0.03);
-            padding: 30px 28px 35px;
+            border-radius: 10px;
+            box-shadow: 0 0 30px rgba(0, 255, 65, 0.2), inset 0 0 20px rgba(0, 255, 65, 0.05);
+            display: flex;
+            flex-direction: column;
             position: relative;
             overflow: hidden;
         }
 
-        /* Scanline effect — retro terminal */
+        /* Scanline effect */
         .terminal::before {
             content: "";
             position: absolute;
@@ -44,53 +47,39 @@
             height: 100%;
             background: repeating-linear-gradient(
                 0deg,
-                rgba(0, 255, 65, 0.02) 0px,
-                rgba(0, 255, 65, 0.02) 2px,
-                transparent 2px,
-                transparent 4px
+                rgba(0, 255, 65, 0.03) 0px,
+                rgba(0, 255, 65, 0.03) 1px,
+                transparent 1px,
+                transparent 3px
             );
             pointer-events: none;
             z-index: 0;
         }
 
-        /* Terminal top status bar */
+        /* Header */
         .terminal-header {
             display: flex;
             justify-content: space-between;
             align-items: center;
             border-bottom: 2px solid #00ff41;
-            padding-bottom: 12px;
-            margin-bottom: 25px;
+            padding: 15px 20px;
             position: relative;
             z-index: 1;
-            flex-wrap: wrap;
-            gap: 8px;
+            background: rgba(0, 255, 65, 0.05);
         }
 
         .terminal-title {
-            color: #00ff41;
             font-size: 1.1rem;
             font-weight: bold;
             letter-spacing: 1.5px;
             text-shadow: 0 0 8px rgba(0, 255, 65, 0.7);
         }
 
-        .terminal-title .blink {
-            animation: blink-anim 1s step-end infinite;
-        }
-
         .terminal-status {
-            color: #00cc33;
             font-size: 0.85rem;
             display: flex;
-            gap: 18px;
-            flex-wrap: wrap;
-        }
-
-        .terminal-status span {
-            display: inline-flex;
-            align-items: center;
-            gap: 6px;
+            gap: 20px;
+            color: #00cc33;
         }
 
         .dot {
@@ -101,11 +90,87 @@
             border-radius: 50%;
             box-shadow: 0 0 8px #00ff41;
             animation: pulse-dot 1.8s infinite;
+            margin-right: 6px;
+            vertical-align: middle;
         }
 
         @keyframes pulse-dot {
             0%, 100% { opacity: 1; }
-            50% { opacity: 0.25; }
+            50% { opacity: 0.3; }
+        }
+
+        /* Output Area */
+        .output-area {
+            flex-grow: 1;
+            padding: 20px;
+            overflow-y: auto;
+            font-size: 0.95rem;
+            line-height: 1.6;
+            white-space: pre-wrap;
+            word-break: break-word;
+            position: relative;
+            z-index: 1;
+            text-shadow: 0 0 3px rgba(0, 255, 65, 0.4);
+        }
+
+        .output-area::-webkit-scrollbar {
+            width: 8px;
+        }
+        .output-area::-webkit-scrollbar-track {
+            background: #0a0a0a;
+        }
+        .output-area::-webkit-scrollbar-thumb {
+            background: #00ff41;
+            border-radius: 4px;
+        }
+
+        /* Input Area */
+        .input-area {
+            display: flex;
+            padding: 15px 20px;
+            border-top: 1px solid #00aa33;
+            background: rgba(0, 0, 0, 0.8);
+            position: relative;
+            z-index: 1;
+        }
+
+        .prompt-symbol {
+            color: #00ff41;
+            font-weight: bold;
+            margin-right: 10px;
+            font-size: 1rem;
+        }
+
+        #terminal-input {
+            flex-grow: 1;
+            background: transparent;
+            border: none;
+            outline: none;
+            color: #00ff41;
+            font-family: 'Courier New', 'Consolas', monospace;
+            font-size: 1rem;
+            caret-color: #00ff41;
+            text-shadow: 0 0 5px rgba(0, 255, 65, 0.7);
+        }
+
+        /* Text Formatting */
+        .hl {
+            color: #ffffff;
+            background: #003311;
+            padding: 0 4px;
+            border-radius: 2px;
+            font-weight: bold;
+            text-shadow: none;
+        }
+
+        .dim { color: #008822; }
+        .cmd { color: #88ffaa; font-weight: bold; }
+        .sys-msg { color: #ffaa00; }
+        .error { color: #ff3333; text-shadow: 0 0 5px rgba(255, 51, 51, 0.5); }
+        .success { color: #00ff41; font-weight: bold; }
+
+        .blink {
+            animation: blink-anim 1s step-end infinite;
         }
 
         @keyframes blink-anim {
@@ -113,434 +178,192 @@
             50% { opacity: 0; }
         }
 
-        /* Intro text block */
-        .intro-text {
-            color: #00cc33;
-            font-size: 0.92rem;
-            line-height: 1.7;
-            margin-bottom: 22px;
-            padding: 14px 18px;
-            border-left: 4px solid #00ff41;
-            background: rgba(0, 255, 65, 0.04);
-            border-radius: 0 6px 6px 0;
-            position: relative;
-            z-index: 1;
-        }
-
-        .intro-text .prompt-symbol {
-            color: #00ff41;
-            font-weight: bold;
-            margin-right: 8px;
-        }
-
-        /* ASCII border decoration */
-        .ascii-box {
-            color: #00ff41;
-            font-size: 0.85rem;
-            line-height: 1.5;
-            white-space: pre;
-            margin-bottom: 12px;
-            position: relative;
-            z-index: 1;
-            text-shadow: 0 0 6px rgba(0, 255, 65, 0.5);
-        }
-
-        /* Copyable prompt block */
-        .prompt-block {
-            position: relative;
-            z-index: 1;
-            margin: 18px 0 26px;
-        }
-
-        .prompt-label {
-            display: inline-block;
-            background: #00ff41;
-            color: #0a0a0a;
-            font-size: 0.75rem;
-            font-weight: bold;
-            letter-spacing: 1.2px;
-            padding: 4px 14px;
-            border-radius: 3px 3px 0 0;
-            margin-bottom: 0;
-        }
-
-        .copy-area {
-            background: #050505;
-            border: 1px solid #00ff41;
-            border-radius: 0 8px 8px 8px;
-            padding: 22px 20px;
-            color: #00ff41;
-            font-family: 'Courier New', 'Consolas', 'Monaco', monospace;
-            font-size: 0.9rem;
-            line-height: 1.85;
-            white-space: pre-wrap;
-            word-break: break-word;
-            position: relative;
-            box-shadow: inset 0 0 20px rgba(0, 255, 65, 0.06);
-            max-height: 520px;
-            overflow-y: auto;
-            cursor: text;
-            user-select: text;
-        }
-
-        /* Custom scrollbar — terminal green */
-        .copy-area::-webkit-scrollbar {
-            width: 8px;
-        }
-
-        .copy-area::-webkit-scrollbar-track {
-            background: #0a0a0a;
-            border-radius: 4px;
-        }
-
-        .copy-area::-webkit-scrollbar-thumb {
-            background: #00ff41;
-            border-radius: 4px;
-            box-shadow: 0 0 8px rgba(0, 255, 65, 0.6);
-        }
-
-        .copy-area::-webkit-scrollbar-thumb:hover {
-            background: #66ff88;
-        }
-
-        .copy-area .hl {
-            color: #ffffff;
-            background: #003311;
-            padding: 0 4px;
-            border-radius: 2px;
-            font-weight: bold;
-        }
-
-        .copy-area .dim {
-            color: #008822;
-        }
-
-        .copy-area .cmd {
-            color: #88ffaa;
-            font-weight: bold;
-        }
-
-        /* Buttons */
-        .button-row {
-            display: flex;
-            gap: 14px;
-            flex-wrap: wrap;
-            margin-top: 24px;
-            position: relative;
-            z-index: 1;
-        }
-
-        .term-btn {
-            background: transparent;
-            border: 2px solid #00ff41;
-            color: #00ff41;
-            font-family: 'Courier New', 'Consolas', monospace;
-            font-size: 0.9rem;
-            font-weight: bold;
-            padding: 12px 28px;
-            border-radius: 6px;
-            cursor: pointer;
-            letter-spacing: 1.2px;
-            transition: all 0.2s ease;
-            text-transform: uppercase;
-            position: relative;
-            overflow: hidden;
-            text-shadow: 0 0 6px rgba(0, 255, 65, 0.6);
-        }
-
-        .term-btn:hover {
-            background: #00ff41;
-            color: #0a0a0a;
-            box-shadow: 0 0 20px rgba(0, 255, 65, 0.5);
-            text-shadow: none;
-        }
-
-        .term-btn:active {
-            transform: scale(0.97);
-        }
-
-        .term-btn.secondary {
-            border-color: #00aa33;
-            color: #00aa33;
-        }
-
-        .term-btn.secondary:hover {
-            background: #00aa33;
-            color: #0a0a0a;
-            border-color: #00aa33;
-            box-shadow: 0 0 20px rgba(0, 170, 51, 0.4);
-        }
-
-        /* Status message (copy feedback) */
-        .status-msg {
-            margin-top: 18px;
-            color: #66ff88;
-            font-size: 0.88rem;
-            min-height: 1.5em;
-            letter-spacing: 0.5px;
-            position: relative;
-            z-index: 1;
-            transition: opacity 0.4s ease;
-        }
-
-        .status-msg .prompt-char {
-            color: #00ff41;
-            font-weight: bold;
-            margin-right: 8px;
-        }
-
-        /* Footer hint — apply by analogy */
-        .footer-hint {
-            margin-top: 28px;
-            padding-top: 20px;
-            border-top: 1px dashed #00aa33;
-            position: relative;
-            z-index: 1;
-        }
-
-        .footer-hint p {
-            color: #00cc33;
-            font-size: 0.82rem;
-            line-height: 1.9;
-            letter-spacing: 0.3px;
-        }
-
-        .footer-hint .hl-green {
-            color: #00ff41;
-            font-weight: bold;
-            text-shadow: 0 0 6px rgba(0, 255, 65, 0.5);
-        }
-
-        .footer-hint .tag {
-            display: inline-block;
-            border: 1px solid #00aa33;
-            padding: 1px 10px;
-            border-radius: 3px;
-            font-size: 0.75rem;
-            color: #00cc33;
-            margin-right: 6px;
-        }
-
-        /* Blinking cursor */
-        .cursor-blink {
-            display: inline-block;
-            width: 10px;
-            height: 1.1em;
-            background: #00ff41;
-            vertical-align: text-bottom;
-            margin-left: 4px;
-            animation: blink-anim 1s step-end infinite;
-            box-shadow: 0 0 8px rgba(0, 255, 65, 0.8);
-        }
-
-        /* Responsive */
-        @media (max-width: 600px) {
-            .terminal {
-                padding: 18px 14px 24px;
-                border-radius: 8px;
-            }
-            .terminal-title {
-                font-size: 0.9rem;
-            }
-            .copy-area {
-                font-size: 0.8rem;
-                padding: 16px 14px;
-                line-height: 1.7;
-            }
-            .term-btn {
-                padding: 10px 18px;
-                font-size: 0.8rem;
-            }
-            .ascii-box {
-                font-size: 0.7rem;
-            }
-        }
     </style>
 </head>
 <body>
 
     <div class="terminal">
-
-        <!-- Top status bar -->
+        <!-- Top Bar -->
         <div class="terminal-header">
             <div class="terminal-title">
-                ⬤ WORLD-HISTORY-REVISION <span class="blink">_</span>
+                ⬤ HISTORY-EXAM-SIMULATOR v1.0
             </div>
             <div class="terminal-status">
-                <span><span class="dot"></span> SYSTEM ONLINE</span>
-                <span>v3.0</span>
-                <span>READY</span>
+                <span><span class="dot"></span>SECURE CONNECTION</span>
+                <span>SCORE: <span id="score-display" style="color:#fff;">0</span>/6</span>
             </div>
         </div>
 
-        <!-- Terminal boot prompt -->
-        <div class="ascii-box">
- ╔══════════════════════════════════════════════════════════════╗
- ║  SYSTEM BOOT: WORLD HISTORY REVISION TERMINAL v3.0          ║
- ║  MODE: INTERFACE / TERMINAL STYLE                           ║
- ║  STATUS: READY FOR COPY & PASTE                             ║
- ╚══════════════════════════════════════════════════════════════╝
+        <!-- Terminal Output -->
+        <div class="output-area" id="output">
+<span class="dim">[SYSTEM BOOT SEQUENCE INITIATED...]</span>
+<span class="dim">[LOADING MODULE: INTERNATIONAL RELATIONS & REASONS FOR CONFLICT BEFORE WWI]</span>
+<span class="dim">[LOADING MODULE: RESULTS BROUGHT BY THE TREATY OF VERSAILLES]</span>
+
+<span class="sys-msg">> INITIATING INTERACTIVE EXAM SIMULATION.</span>
+<span class="sys-msg">> INSTRUCTIONS: TYPE THE MISSING KEYWORD OR PHRASE TO COMPLETE THE STATEMENT.</span>
+<span class="sys-msg">> TYPE <span class="hl">HINT</span> FOR A CLUE. TYPE <span class="hl">SKIP</span> TO MOVE ON.</span>
+
+──────────────────────────────────────────────────────────────
+<span class="cmd">> QUESTION 1/6: THE SPARK</span>
+Before WWI, nations were engaged in a massive <span class="hl">________</span>, racing to build superior navies, specifically the Dreadnoughts.
+<span class="dim">(Awaiting input...)</span>
         </div>
 
-        <!-- Description text -->
-        <div class="intro-text">
-            <span class="prompt-symbol">▸</span>
-            Below is an example using the Secondary 3 World History topics (Causes of WWI &amp; Results of the Treaty of Versailles) to demonstrate how to revise with the worldview analogy method. Copy the block below and paste it into any free AI to start.
+        <!-- Input Area -->
+        <div class="input-area">
+            <span class="prompt-symbol">student@history:~$</span>
+            <input type="text" id="terminal-input" autocomplete="off" autofocus spellcheck="false" placeholder="Type your answer here...">
         </div>
-
-        <!-- Copyable prompt block -->
-        <div class="prompt-block">
-            <div class="prompt-label">[ PROMPT TEMPLATE — COPY THE TEXT BELOW ]</div>
-            <div class="copy-area" id="promptContent">
-<span class="dim">┌──────────────────────────────────────────────────────────────┐</span>
-<span class="dim">│  ▸ [PROMPT TEMPLATE — COPY BELOW THIS LINE]                  │</span>
-<span class="dim">└──────────────────────────────────────────────────────────────┘</span>
-
-I am a Secondary 3 student in Hong Kong, revising World History for two topics:
-"<span class="hl">International relations and reasons for conflict before the First World War (WWI)</span>" and "<span class="hl">The results brought by the Treaty of Versailles</span>".
-
-Please answer entirely in English, but all important historical terms and exam keywords must be retained in <span class="hl">English</span> (and may be annotated in Chinese if helpful).
-Use the anime <span class="cmd">【Doraemon】</span> — its character factions, relationships, and worldview rules — as a lively and interesting analogy. Explain the following 6 topics in order:
-
-1. <span class="hl">International Situation &amp; Economic and Colonial Competition</span>
-   (competition for territory, spheres of influence, and rare resources)
-2. <span class="hl">Arms Race</span>
-   (the race to develop or seize more powerful weapons and equipment, e.g. Dreadnoughts)
-3. <span class="hl">Alliance System</span>
-   (Triple Entente vs Triple Alliance — explain why a small conflict between the two sides dragged all alliance members into a full-scale war)
-4. <span class="hl">Extreme Nationalism</span>
-   (Pan-Germanism and Pan-Slavism in the Balkans "<span class="hl">Powder Keg</span>")
-5. <span class="hl">Pre-war Conflicts &amp; Immediate Cause (Sarajevo Incident)</span>
-   and how they directly triggered the <span class="hl">Outbreak and Development of WWI</span>
-6. <span class="hl">Outcome of the War</span>: the post-war <span class="hl">Paris Peace Conference</span>, the extremely harsh <span class="hl">terms of the Treaty of Versailles on Germany</span> (including <span class="hl">land loss, disarmament, war guilt, reparations</span>), and the <span class="hl">redrawing of Europe's map</span>.
-
-After writing the analogy story, you must produce a clear <span class="hl">3-column comparison table</span>:
-[Column 1: Anime Analogy Element] | [Column 2: Real WWI Historical Event &amp; English Terminology] | [Column 3: Must-Write <span class="hl">Key Exam Keywords</span>]
-
-<span class="dim">┌──────────────────────────────────────────────────────────────┐</span>
-<span class="dim">│  ▸ [END OF PROMPT TEMPLATE]                                  │</span>
-<span class="dim">└──────────────────────────────────────────────────────────────┘</span>
-            </div>
-        </div>
-
-        <!-- Action buttons -->
-        <div class="button-row">
-            <button class="term-btn" id="copyBtn">⧉ COPY PROMPT</button>
-            <button class="term-btn secondary" id="clearBtn">✕ CLEAR</button>
-        </div>
-
-        <!-- Status feedback -->
-        <div class="status-msg" id="statusMsg">
-            <span class="prompt-char">user@revision:~$</span><span id="statusText">Awaiting command...</span><span class="cursor-blink"></span>
-        </div>
-
-        <!-- Footer hint — apply by analogy -->
-        <div class="footer-hint">
-            <p>
-                <span class="tag">💡 APPLY BY ANALOGY</span>
-                Replace <span class="hl-green">【Doraemon】</span> in the first paragraph with any anime, game, or sport you are familiar with;<br>
-                no other changes are needed — you can use it directly! When revising other subjects (e.g. science concepts or geography phenomena),<br>
-                you can likewise ask the AI to explain in English and attach an "analogy element vs. English academic term" comparison table.
-            </p>
-        </div>
-
     </div>
 
     <script>
-        (function() {
-            const copyArea = document.getElementById('promptContent');
-            const copyBtn = document.getElementById('copyBtn');
-            const clearBtn = document.getElementById('clearBtn');
-            const statusText = document.getElementById('statusText');
-            const statusMsg = document.getElementById('statusMsg');
+        const output = document.getElementById('output');
+        const input = document.getElementById('terminal-input');
+        const scoreDisplay = document.getElementById('score-display');
+        const terminal = document.querySelector('.terminal');
 
-            // Get plain text content (strip HTML tags but preserve text structure)
-            function getPlainText() {
-                // innerText preserves line breaks and whitespace formatting
-                let text = copyArea.innerText;
-                // Remove leading blank lines
-                text = text.replace(/^\n+/, '');
-                return text.trim();
+        let score = 0;
+        let currentQuestionIndex = 0;
+
+        // Game Data
+        const questions = [
+            {
+                id: 1,
+                topic: "CAUSES OF WWI",
+                question: "Before WWI, nations were engaged in a massive <span class='hl'>________</span>, racing to build superior navies, specifically the Dreadnoughts.",
+                answers: ["arms race", "armsrace"],
+                hint: "It starts with 'A' and ends with 'Race'. It involves military escalation.",
+                successMsg: "Correct! The <span class='hl'>Arms Race</span> (and Militarism) was a major long-term cause of WWI."
+            },
+            {
+                id: 2,
+                topic: "CAUSES OF WWI",
+                question: "Europe was divided into two major armed camps: the Triple Entente and the Triple Alliance. This system is known as the <span class='hl'>________</span>.",
+                answers: ["alliance system", "alliances", "alliance"],
+                hint: "It's about countries forming treaties to protect each other.",
+                successMsg: "Correct! The <span class='hl'>Alliance System</span> meant a small conflict would drag all members into war."
+            },
+            {
+                id: 3,
+                topic: "CAUSES OF WWI",
+                question: "The <span class='hl'>________</span> Incident (the assassination of Archduke Franz Ferdinand) was the immediate trigger that caused the outbreak of WWI.",
+                answers: ["sarajevo", "sarajevo incident"],
+                hint: "It happened in a city in the Balkans.",
+                successMsg: "Correct! The <span class='hl'>Sarajevo Incident</span> was the immediate cause (the spark) of the war."
+            },
+            {
+                id: 4,
+                topic: "TREATY OF VERSAILLES",
+                question: "The treaty forced Germany to accept <span class='hl'>________</span>, meaning they had to take full responsibility for starting the war.",
+                answers: ["war guilt", "warguilt", "war guilt clause"],
+                hint: "Two words. It's a legal term for blame.",
+                successMsg: "Correct! The <span class='hl'>War Guilt</span> clause was a humiliating term for Germany."
+            },
+            {
+                id: 5,
+                topic: "TREATY OF VERSAILLES",
+                question: "Germany was forced to pay massive financial compensation to the Allies for the damage caused by the war. This is called <span class='hl'>________</span>.",
+                answers: ["reparations", "reparation"],
+                hint: "It starts with 'R'. It means paying for damages.",
+                successMsg: "Correct! <span class='hl'>Reparations</span> crippled the German economy."
+            },
+            {
+                id: 6,
+                topic: "TREATY OF VERSAILLES",
+                question: "Under the harsh terms of the treaty, Germany suffered severe <span class='hl'>________</span> (e.g., losing Alsace-Lorraine and its overseas colonies) and had to undergo strict disarmament.",
+                answers: ["land loss", "landloss", "territorial loss"],
+                hint: "Two words. They lost physical territory.",
+                successMsg: "Correct! <span class='hl'>Land loss</span> and redrawing the map caused deep resentment."
             }
+        ];
 
-            // Update status line
-            function setStatus(msg, isError = false) {
-                statusText.textContent = msg;
-                statusText.style.color = isError ? '#ff4444' : '#66ff88';
-                statusMsg.style.opacity = '0.5';
-                setTimeout(() => {
-                    statusMsg.style.opacity = '1';
-                }, 60);
-            }
-
-            // Copy functionality
-            copyBtn.addEventListener('click', async function() {
-                const textToCopy = getPlainText();
-
-                try {
-                    // Prefer Clipboard API
-                    if (navigator.clipboard && window.isSecureContext) {
-                        await navigator.clipboard.writeText(textToCopy);
-                        setStatus('PROMPT copied to clipboard ✓ Paste into any AI to start');
-                    } else {
-                        // Fallback: textarea + execCommand
-                        const textarea = document.createElement('textarea');
-                        textarea.value = textToCopy;
-                        textarea.style.position = 'fixed';
-                        textarea.style.opacity = '0';
-                        textarea.style.left = '-9999px';
-                        document.body.appendChild(textarea);
-                        textarea.select();
-                        textarea.setSelectionRange(0, textToCopy.length);
-                        const success = document.execCommand('copy');
-                        document.body.removeChild(textarea);
-
-                        if (success) {
-                            setStatus('PROMPT copied to clipboard ✓ Paste into any AI to start');
-                        } else {
-                            setStatus('Copy failed — please select the text manually (Ctrl+C)', true);
-                        }
-                    }
-                } catch (err) {
-                    // Further fallback
-                    try {
-                        const textarea = document.createElement('textarea');
-                        textarea.value = textToCopy;
-                        textarea.style.position = 'fixed';
-                        textarea.style.opacity = '0';
-                        document.body.appendChild(textarea);
-                        textarea.select();
-                        document.execCommand('copy');
-                        document.body.removeChild(textarea);
-                        setStatus('PROMPT copied to clipboard ✓ Paste into any AI to start');
-                    } catch (e) {
-                        setStatus('Copy failed — please select the text manually (Ctrl+C)', true);
-                    }
+        // Initialize Game
+        function initGame() {
+            input.addEventListener('keydown', function(e) {
+                if (e.key === 'Enter') {
+                    e.preventDefault();
+                    handleInput(input.value.trim().toLowerCase());
+                    input.value = '';
                 }
             });
+            // Keep input focused if user clicks anywhere in terminal
+            terminal.addEventListener('click', () => input.focus());
+        }
 
-            // Clear / reset status
-            clearBtn.addEventListener('click', function() {
-                setStatus('Terminal reset — ready to copy the PROMPT again');
-            });
+        function handleInput(value) {
+            if (value === '') return;
 
-            // Clicking the copy area selects all (convenient for manual copy)
-            copyArea.addEventListener('click', function(e) {
-                // Don't interfere if the user is selecting text 
-                if (window.getSelection().toString().length > 0) return;
-                // Otherwise select all content in the area
-                const range = document.createRange();
-                range.selectNodeContents(copyArea);
-                const sel = window.getSelection();
-                sel.removeAllRanges();
-                sel.addRange(range);
-                setStatus('Text selected — press Ctrl+C to copy');
-            });
+            // Print user input
+            printOutput(`<span class="prompt-symbol">student@history:~$</span> ${value}`);
 
-            // Initialise status
-            setStatus('System ready — click the "COPY PROMPT" button');
-        })();
+            if (value === 'skip') {
+                printOutput(`<span class="error">> SYSTEM: Question skipped. The correct answer was: <span class="hl">${questions[currentQuestionIndex].answers[0]}</span></span>`);
+                nextQuestion();
+                return;
+            }
+
+            if (value === 'hint') {
+                printOutput(`<span class="sys-msg">> HINT: ${questions[currentQuestionIndex].hint}</span>\n`);
+                return;
+            }
+
+            // Validate Answer
+            const currentQ = questions[currentQuestionIndex];
+            if (currentQ.answers.includes(value)) {
+                // Correct
+                score++;
+                scoreDisplay.textContent = score;
+                printOutput(`<span class="success">> [ACCESS GRANTED] ${currentQ.successMsg}</span>`);
+                nextQuestion();
+            } else {
+                // Incorrect
+                printOutput(`<span class="error">> [ACCESS DENIED] Incorrect. Try again, or type 'hint'.</span>\n`);
+            }
+        }
+
+        function nextQuestion() {
+            currentQuestionIndex++;
+            printOutput(`──────────────────────────────────────────────────────────────`);
+            
+            if (currentQuestionIndex < questions.length) {
+                const q = questions[currentQuestionIndex];
+                printOutput(`<span class="cmd">> QUESTION ${q.id}/6: ${q.topic}</span>`);
+                printOutput(`${q.question}\n<span class="dim">(Awaiting input...)</span>`);
+            } else {
+                endGame();
+            }
+        }
+
+        function endGame() {
+            const percentage = (score / questions.length) * 100;
+            let grade = "F";
+            if (percentage >= 80) grade = "A";
+            else if (percentage >= 60) grade = "B";
+            else if (percentage >= 40) grade = "C";
+
+            printOutput(`<span class="sys-msg">> EXAM SIMULATION COMPLETE.</span>`);
+            printOutput(`> FINAL SCORE: <span class="hl">${score}/${questions.length}</span> (Grade: ${grade})`);
+            printOutput(`<span class="dim">[SYSTEM SHUTTING DOWN... REFRESH PAGE TO TRY AGAIN]</span>`);
+            printOutput(`<span class="cursor-blink"></span>`);
+            
+            // Disable input
+            input.disabled = true;
+            input.parentElement.style.opacity = '0.5';
+            input.placeholder = "Simulation ended. Refresh to restart.";
+        }
+
+        function printOutput(text) {
+            const newDiv = document.createElement('div');
+            newDiv.innerHTML = text;
+            output.appendChild(newDiv);
+            // Scroll to bottom
+            output.scrollTop = output.scrollHeight;
+        }
+
+        // Start
+        initGame();
+
     </script>
-
 </body>
 </html>
