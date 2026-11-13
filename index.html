@@ -526,7 +526,7 @@ After writing the analogy story, you must produce a clear <span class="hl">3-col
 
             // Clicking the copy area selects all (convenient for manual copy)
             copyArea.addEventListener('click', function(e) {
-                // Don't interfere if the user is selecting text
+                // Don't interfere if the user is selecting text 
                 if (window.getSelection().toString().length > 0) return;
                 // Otherwise select all content in the area
                 const range = document.createRange();
