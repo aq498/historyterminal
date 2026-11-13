@@ -1,0 +1,546 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>World History · Terminal Revision Template</title>
+    <style>
+        /* Terminal Style — Green Text on Black Background */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background-color: #0a0a0a;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-family: 'Courier New', 'Consolas', 'Monaco', 'Lucida Console', monospace;
+            padding: 20px;
+        }
+
+        .terminal {
+            width: 100%;
+            max-width: 1100px;
+            background-color: #0f0f0f;
+            border: 2px solid #00ff41;
+            border-radius: 12px;
+            box-shadow: 0 0 30px rgba(0, 255, 65, 0.25), inset 0 0 30px rgba(0, 255, 65, 0.03);
+            padding: 30px 28px 35px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        /* Scanline effect — retro terminal */
+        .terminal::before {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: repeating-linear-gradient(
+                0deg,
+                rgba(0, 255, 65, 0.02) 0px,
+                rgba(0, 255, 65, 0.02) 2px,
+                transparent 2px,
+                transparent 4px
+            );
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        /* Terminal top status bar */
+        .terminal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 2px solid #00ff41;
+            padding-bottom: 12px;
+            margin-bottom: 25px;
+            position: relative;
+            z-index: 1;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+
+        .terminal-title {
+            color: #00ff41;
+            font-size: 1.1rem;
+            font-weight: bold;
+            letter-spacing: 1.5px;
+            text-shadow: 0 0 8px rgba(0, 255, 65, 0.7);
+        }
+
+        .terminal-title .blink {
+            animation: blink-anim 1s step-end infinite;
+        }
+
+        .terminal-status {
+            color: #00cc33;
+            font-size: 0.85rem;
+            display: flex;
+            gap: 18px;
+            flex-wrap: wrap;
+        }
+
+        .terminal-status span {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .dot {
+            display: inline-block;
+            width: 9px;
+            height: 9px;
+            background-color: #00ff41;
+            border-radius: 50%;
+            box-shadow: 0 0 8px #00ff41;
+            animation: pulse-dot 1.8s infinite;
+        }
+
+        @keyframes pulse-dot {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.25; }
+        }
+
+        @keyframes blink-anim {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0; }
+        }
+
+        /* Intro text block */
+        .intro-text {
+            color: #00cc33;
+            font-size: 0.92rem;
+            line-height: 1.7;
+            margin-bottom: 22px;
+            padding: 14px 18px;
+            border-left: 4px solid #00ff41;
+            background: rgba(0, 255, 65, 0.04);
+            border-radius: 0 6px 6px 0;
+            position: relative;
+            z-index: 1;
+        }
+
+        .intro-text .prompt-symbol {
+            color: #00ff41;
+            font-weight: bold;
+            margin-right: 8px;
+        }
+
+        /* ASCII border decoration */
+        .ascii-box {
+            color: #00ff41;
+            font-size: 0.85rem;
+            line-height: 1.5;
+            white-space: pre;
+            margin-bottom: 12px;
+            position: relative;
+            z-index: 1;
+            text-shadow: 0 0 6px rgba(0, 255, 65, 0.5);
+        }
+
+        /* Copyable prompt block */
+        .prompt-block {
+            position: relative;
+            z-index: 1;
+            margin: 18px 0 26px;
+        }
+
+        .prompt-label {
+            display: inline-block;
+            background: #00ff41;
+            color: #0a0a0a;
+            font-size: 0.75rem;
+            font-weight: bold;
+            letter-spacing: 1.2px;
+            padding: 4px 14px;
+            border-radius: 3px 3px 0 0;
+            margin-bottom: 0;
+        }
+
+        .copy-area {
+            background: #050505;
+            border: 1px solid #00ff41;
+            border-radius: 0 8px 8px 8px;
+            padding: 22px 20px;
+            color: #00ff41;
+            font-family: 'Courier New', 'Consolas', 'Monaco', monospace;
+            font-size: 0.9rem;
+            line-height: 1.85;
+            white-space: pre-wrap;
+            word-break: break-word;
+            position: relative;
+            box-shadow: inset 0 0 20px rgba(0, 255, 65, 0.06);
+            max-height: 520px;
+            overflow-y: auto;
+            cursor: text;
+            user-select: text;
+        }
+
+        /* Custom scrollbar — terminal green */
+        .copy-area::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        .copy-area::-webkit-scrollbar-track {
+            background: #0a0a0a;
+            border-radius: 4px;
+        }
+
+        .copy-area::-webkit-scrollbar-thumb {
+            background: #00ff41;
+            border-radius: 4px;
+            box-shadow: 0 0 8px rgba(0, 255, 65, 0.6);
+        }
+
+        .copy-area::-webkit-scrollbar-thumb:hover {
+            background: #66ff88;
+        }
+
+        .copy-area .hl {
+            color: #ffffff;
+            background: #003311;
+            padding: 0 4px;
+            border-radius: 2px;
+            font-weight: bold;
+        }
+
+        .copy-area .dim {
+            color: #008822;
+        }
+
+        .copy-area .cmd {
+            color: #88ffaa;
+            font-weight: bold;
+        }
+
+        /* Buttons */
+        .button-row {
+            display: flex;
+            gap: 14px;
+            flex-wrap: wrap;
+            margin-top: 24px;
+            position: relative;
+            z-index: 1;
+        }
+
+        .term-btn {
+            background: transparent;
+            border: 2px solid #00ff41;
+            color: #00ff41;
+            font-family: 'Courier New', 'Consolas', monospace;
+            font-size: 0.9rem;
+            font-weight: bold;
+            padding: 12px 28px;
+            border-radius: 6px;
+            cursor: pointer;
+            letter-spacing: 1.2px;
+            transition: all 0.2s ease;
+            text-transform: uppercase;
+            position: relative;
+            overflow: hidden;
+            text-shadow: 0 0 6px rgba(0, 255, 65, 0.6);
+        }
+
+        .term-btn:hover {
+            background: #00ff41;
+            color: #0a0a0a;
+            box-shadow: 0 0 20px rgba(0, 255, 65, 0.5);
+            text-shadow: none;
+        }
+
+        .term-btn:active {
+            transform: scale(0.97);
+        }
+
+        .term-btn.secondary {
+            border-color: #00aa33;
+            color: #00aa33;
+        }
+
+        .term-btn.secondary:hover {
+            background: #00aa33;
+            color: #0a0a0a;
+            border-color: #00aa33;
+            box-shadow: 0 0 20px rgba(0, 170, 51, 0.4);
+        }
+
+        /* Status message (copy feedback) */
+        .status-msg {
+            margin-top: 18px;
+            color: #66ff88;
+            font-size: 0.88rem;
+            min-height: 1.5em;
+            letter-spacing: 0.5px;
+            position: relative;
+            z-index: 1;
+            transition: opacity 0.4s ease;
+        }
+
+        .status-msg .prompt-char {
+            color: #00ff41;
+            font-weight: bold;
+            margin-right: 8px;
+        }
+
+        /* Footer hint — apply by analogy */
+        .footer-hint {
+            margin-top: 28px;
+            padding-top: 20px;
+            border-top: 1px dashed #00aa33;
+            position: relative;
+            z-index: 1;
+        }
+
+        .footer-hint p {
+            color: #00cc33;
+            font-size: 0.82rem;
+            line-height: 1.9;
+            letter-spacing: 0.3px;
+        }
+
+        .footer-hint .hl-green {
+            color: #00ff41;
+            font-weight: bold;
+            text-shadow: 0 0 6px rgba(0, 255, 65, 0.5);
+        }
+
+        .footer-hint .tag {
+            display: inline-block;
+            border: 1px solid #00aa33;
+            padding: 1px 10px;
+            border-radius: 3px;
+            font-size: 0.75rem;
+            color: #00cc33;
+            margin-right: 6px;
+        }
+
+        /* Blinking cursor */
+        .cursor-blink {
+            display: inline-block;
+            width: 10px;
+            height: 1.1em;
+            background: #00ff41;
+            vertical-align: text-bottom;
+            margin-left: 4px;
+            animation: blink-anim 1s step-end infinite;
+            box-shadow: 0 0 8px rgba(0, 255, 65, 0.8);
+        }
+
+        /* Responsive */
+        @media (max-width: 600px) {
+            .terminal {
+                padding: 18px 14px 24px;
+                border-radius: 8px;
+            }
+            .terminal-title {
+                font-size: 0.9rem;
+            }
+            .copy-area {
+                font-size: 0.8rem;
+                padding: 16px 14px;
+                line-height: 1.7;
+            }
+            .term-btn {
+                padding: 10px 18px;
+                font-size: 0.8rem;
+            }
+            .ascii-box {
+                font-size: 0.7rem;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="terminal">
+
+        <!-- Top status bar -->
+        <div class="terminal-header">
+            <div class="terminal-title">
+                ⬤ WORLD-HISTORY-REVISION <span class="blink">_</span>
+            </div>
+            <div class="terminal-status">
+                <span><span class="dot"></span> SYSTEM ONLINE</span>
+                <span>v3.0</span>
+                <span>READY</span>
+            </div>
+        </div>
+
+        <!-- Terminal boot prompt -->
+        <div class="ascii-box">
+ ╔══════════════════════════════════════════════════════════════╗
+ ║  SYSTEM BOOT: WORLD HISTORY REVISION TERMINAL v3.0          ║
+ ║  MODE: INTERFACE / TERMINAL STYLE                           ║
+ ║  STATUS: READY FOR COPY & PASTE                             ║
+ ╚══════════════════════════════════════════════════════════════╝
+        </div>
+
+        <!-- Description text -->
+        <div class="intro-text">
+            <span class="prompt-symbol">▸</span>
+            Below is an example using the Secondary 3 World History topics (Causes of WWI &amp; Results of the Treaty of Versailles) to demonstrate how to revise with the worldview analogy method. Copy the block below and paste it into any free AI to start.
+        </div>
+
+        <!-- Copyable prompt block -->
+        <div class="prompt-block">
+            <div class="prompt-label">[ PROMPT TEMPLATE — COPY THE TEXT BELOW ]</div>
+            <div class="copy-area" id="promptContent">
+<span class="dim">┌──────────────────────────────────────────────────────────────┐</span>
+<span class="dim">│  ▸ [PROMPT TEMPLATE — COPY BELOW THIS LINE]                  │</span>
+<span class="dim">└──────────────────────────────────────────────────────────────┘</span>
+
+I am a Secondary 3 student in Hong Kong, revising World History for two topics:
+"<span class="hl">International relations and reasons for conflict before the First World War (WWI)</span>" and "<span class="hl">The results brought by the Treaty of Versailles</span>".
+
+Please answer entirely in English, but all important historical terms and exam keywords must be retained in <span class="hl">English</span> (and may be annotated in Chinese if helpful).
+Use the anime <span class="cmd">【Doraemon】</span> — its character factions, relationships, and worldview rules — as a lively and interesting analogy. Explain the following 6 topics in order:
+
+1. <span class="hl">International Situation &amp; Economic and Colonial Competition</span>
+   (competition for territory, spheres of influence, and rare resources)
+2. <span class="hl">Arms Race</span>
+   (the race to develop or seize more powerful weapons and equipment, e.g. Dreadnoughts)
+3. <span class="hl">Alliance System</span>
+   (Triple Entente vs Triple Alliance — explain why a small conflict between the two sides dragged all alliance members into a full-scale war)
+4. <span class="hl">Extreme Nationalism</span>
+   (Pan-Germanism and Pan-Slavism in the Balkans "<span class="hl">Powder Keg</span>")
+5. <span class="hl">Pre-war Conflicts &amp; Immediate Cause (Sarajevo Incident)</span>
+   and how they directly triggered the <span class="hl">Outbreak and Development of WWI</span>
+6. <span class="hl">Outcome of the War</span>: the post-war <span class="hl">Paris Peace Conference</span>, the extremely harsh <span class="hl">terms of the Treaty of Versailles on Germany</span> (including <span class="hl">land loss, disarmament, war guilt, reparations</span>), and the <span class="hl">redrawing of Europe's map</span>.
+
+After writing the analogy story, you must produce a clear <span class="hl">3-column comparison table</span>:
+[Column 1: Anime Analogy Element] | [Column 2: Real WWI Historical Event &amp; English Terminology] | [Column 3: Must-Write <span class="hl">Key Exam Keywords</span>]
+
+<span class="dim">┌──────────────────────────────────────────────────────────────┐</span>
+<span class="dim">│  ▸ [END OF PROMPT TEMPLATE]                                  │</span>
+<span class="dim">└──────────────────────────────────────────────────────────────┘</span>
+            </div>
+        </div>
+
+        <!-- Action buttons -->
+        <div class="button-row">
+            <button class="term-btn" id="copyBtn">⧉ COPY PROMPT</button>
+            <button class="term-btn secondary" id="clearBtn">✕ CLEAR</button>
+        </div>
+
+        <!-- Status feedback -->
+        <div class="status-msg" id="statusMsg">
+            <span class="prompt-char">user@revision:~$</span><span id="statusText">Awaiting command...</span><span class="cursor-blink"></span>
+        </div>
+
+        <!-- Footer hint — apply by analogy -->
+        <div class="footer-hint">
+            <p>
+                <span class="tag">💡 APPLY BY ANALOGY</span>
+                Replace <span class="hl-green">【Doraemon】</span> in the first paragraph with any anime, game, or sport you are familiar with;<br>
+                no other changes are needed — you can use it directly! When revising other subjects (e.g. science concepts or geography phenomena),<br>
+                you can likewise ask the AI to explain in English and attach an "analogy element vs. English academic term" comparison table.
+            </p>
+        </div>
+
+    </div>
+
+    <script>
+        (function() {
+            const copyArea = document.getElementById('promptContent');
+            const copyBtn = document.getElementById('copyBtn');
+            const clearBtn = document.getElementById('clearBtn');
+            const statusText = document.getElementById('statusText');
+            const statusMsg = document.getElementById('statusMsg');
+
+            // Get plain text content (strip HTML tags but preserve text structure)
+            function getPlainText() {
+                // innerText preserves line breaks and whitespace formatting
+                let text = copyArea.innerText;
+                // Remove leading blank lines
+                text = text.replace(/^\n+/, '');
+                return text.trim();
+            }
+
+            // Update status line
+            function setStatus(msg, isError = false) {
+                statusText.textContent = msg;
+                statusText.style.color = isError ? '#ff4444' : '#66ff88';
+                statusMsg.style.opacity = '0.5';
+                setTimeout(() => {
+                    statusMsg.style.opacity = '1';
+                }, 60);
+            }
+
+            // Copy functionality
+            copyBtn.addEventListener('click', async function() {
+                const textToCopy = getPlainText();
+
+                try {
+                    // Prefer Clipboard API
+                    if (navigator.clipboard && window.isSecureContext) {
+                        await navigator.clipboard.writeText(textToCopy);
+                        setStatus('PROMPT copied to clipboard ✓ Paste into any AI to start');
+                    } else {
+                        // Fallback: textarea + execCommand
+                        const textarea = document.createElement('textarea');
+                        textarea.value = textToCopy;
+                        textarea.style.position = 'fixed';
+                        textarea.style.opacity = '0';
+                        textarea.style.left = '-9999px';
+                        document.body.appendChild(textarea);
+                        textarea.select();
+                        textarea.setSelectionRange(0, textToCopy.length);
+                        const success = document.execCommand('copy');
+                        document.body.removeChild(textarea);
+
+                        if (success) {
+                            setStatus('PROMPT copied to clipboard ✓ Paste into any AI to start');
+                        } else {
+                            setStatus('Copy failed — please select the text manually (Ctrl+C)', true);
+                        }
+                    }
+                } catch (err) {
+                    // Further fallback
+                    try {
+                        const textarea = document.createElement('textarea');
+                        textarea.value = textToCopy;
+                        textarea.style.position = 'fixed';
+                        textarea.style.opacity = '0';
+                        document.body.appendChild(textarea);
+                        textarea.select();
+                        document.execCommand('copy');
+                        document.body.removeChild(textarea);
+                        setStatus('PROMPT copied to clipboard ✓ Paste into any AI to start');
+                    } catch (e) {
+                        setStatus('Copy failed — please select the text manually (Ctrl+C)', true);
+                    }
+                }
+            });
+
+            // Clear / reset status
+            clearBtn.addEventListener('click', function() {
+                setStatus('Terminal reset — ready to copy the PROMPT again');
+            });
+
+            // Clicking the copy area selects all (convenient for manual copy)
+            copyArea.addEventListener('click', function(e) {
+                // Don't interfere if the user is selecting text
+                if (window.getSelection().toString().length > 0) return;
+                // Otherwise select all content in the area
+                const range = document.createRange();
+                range.selectNodeContents(copyArea);
+                const sel = window.getSelection();
+                sel.removeAllRanges();
+                sel.addRange(range);
+                setStatus('Text selected — press Ctrl+C to copy');
+            });
+
+            // Initialise status
+            setStatus('System ready — click the "COPY PROMPT" button');
+        })();
+    </script>
+
+</body>
+</html>
